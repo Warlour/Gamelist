@@ -70,42 +70,48 @@ int main(int argc, char* argv[]) {
                 }
             }
             file.close();
-        } 
+        }
         // If file couldnt be opened
         else {
-            cout << "Could not find defaultpaths.txt" << endl;
+            cout << "Could not find defaultpaths.txt" << endl << "Creating one, simply insert library paths separated by linebreaks" << endl;
+            ofstream outfile("defaultpaths.txt");
+            outfile.close();
             return 0;
         }
     }
 
-    cout << "Folder sizes:" << endl;
-    for (size_t i = 0; i < validDirs.size(); i++) {
-        // Iterate over all the files and subdirectories in the folder
-        uintmax_t total_size = 0;
-        for (const auto& entry : fs::recursive_directory_iterator(validDirs[i])) {
-            // Add the size of each file to the total size
-            if (fs::is_regular_file(entry)) {
-                total_size += fs::file_size(entry);
-            }
-        }
-
-        // Convert byte to megabyte
-        cout << validDirs[i] << " | " << (total_size / 1000000) << " MB (" << total_size << " bytes)" << endl;
-        
-        for (const auto& folder: fs::directory_iterator(validDirs[i])) {
-            if (folder.is_directory()) {
-                string filename = folder.path().filename().string();
-                uintmax_t game_size = 0;
-                for (const auto& game : fs::recursive_directory_iterator(folder)) {
-                    if (fs::is_regular_file(game)) {
-                        game_size += fs::file_size(game);
-                    }
+    if (validDirs.size() > 1) {
+        cout << "Folder sizes:" << endl;
+        for (size_t i = 0; i < validDirs.size(); i++) {
+            // Iterate over all the files and subdirectories in the folder
+            uintmax_t total_size = 0;
+            for (const auto& entry : fs::recursive_directory_iterator(validDirs[i])) {
+                // Add the size of each file to the total size
+                if (fs::is_regular_file(entry)) {
+                    total_size += fs::file_size(entry);
                 }
-                cout << "  " << filename.substr(filename.find_last_of("\\") + 1) << " | " << (game_size / 1000000) << " MB (" << game_size << " bytes)" << endl;
             }
+
+            // Convert byte to megabyte
+            cout << validDirs[i] << " | " << (total_size / 1000000) << " MB (" << total_size << " bytes)" << endl;
+            
+            for (const auto& folder: fs::directory_iterator(validDirs[i])) {
+                if (folder.is_directory()) {
+                    string filename = folder.path().filename().string();
+                    uintmax_t game_size = 0;
+                    for (const auto& game : fs::recursive_directory_iterator(folder)) {
+                        if (fs::is_regular_file(game)) {
+                            game_size += fs::file_size(game);
+                        }
+                    }
+                    cout << "  " << filename.substr(filename.find_last_of("\\") + 1) << " | " << (game_size / 1000000) << " MB (" << game_size << " bytes)" << endl;
+                }
+            }
+            if (i != validDirs.size()-1)
+                cout << endl;
         }
-        if (i != validDirs.size()-1)
-            cout << endl;
+    } else {
+        cout << "No folders given" << endl;
     }
 
     // If there is any invalid directories
