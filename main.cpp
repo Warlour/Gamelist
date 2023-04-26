@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (validDirs.size() > 1) {
+    if (validDirs.size() > 0) {
         cout << "Folder sizes:" << endl;
         for (size_t i = 0; i < validDirs.size(); i++) {
             // Iterate over all the files and subdirectories in the folder
