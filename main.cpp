@@ -2,6 +2,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <iomanip>
+
+// Sort vector
+#include <algorithm>
 
 #include <filesystem> // C++17
 namespace fs = std::filesystem;
@@ -57,7 +61,6 @@ int main(int argc, char* argv[]) {
     }
 
     if (validDirs.size() < 1 && arguments.size() < 1) {
-        cout << "No arguments given, trying default paths" << endl;
         ifstream file("defaultpaths.txt");
         
         if (file.is_open()) {
@@ -93,8 +96,12 @@ int main(int argc, char* argv[]) {
             }
 
             // Convert byte to megabyte
-            cout << validDirs[i] << " | " << (total_size / 1000000) << " MB (" << total_size << " bytes)" << endl;
+            cout << "\033[44m" << validDirs[i] << " | " << (total_size / 1000000) << " MB (" << total_size << " bytes)" << "\033[0m" << endl;
+
+            // Create vector of pairs to later sort by size
+            vector<pair<string, uintmax_t>> games;
             
+            // Get game sizes
             for (const auto& folder: fs::directory_iterator(validDirs[i])) {
                 if (folder.is_directory()) {
                     string filename = folder.path().filename().string();
@@ -104,23 +111,42 @@ int main(int argc, char* argv[]) {
                             game_size += fs::file_size(game);
                         }
                     }
-                    cout << "  " << filename.substr(filename.find_last_of("\\") + 1) << " | " << (game_size / 1000000) << " MB (" << game_size << " bytes)" << endl;
+                    games.push_back(make_pair(filename.substr(filename.find_last_of("\\") + 1), game_size));
                 }
             }
+
+            // Sort by size
+            sort(games.begin(), games.end(), [](const pair<string, uintmax_t>& a, const pair<string, uintmax_t>& b){
+                return a.second > b.second;
+            });
+
+            int longestLength = 0;
+            for (auto& p : games) {
+                int len = p.first.length();
+                if (len > longestLength) {
+                    longestLength = len;
+                }
+            }
+
+            // Output games
+            for (auto game : games) {
+                cout << "  \033[32m" << left << setw(longestLength+5) << game.first << "\033[0m " << setw(0) << to_string(game.second / 1000000) + " MB" << " (" + to_string(game.second) + " bytes)" << endl;
+            }
+
             if (i != validDirs.size()-1)
                 cout << endl;
         }
     } else {
-        cout << "No folders given" << endl;
+        cout << "\033[31m" << "No folders given" << "\033[0m" << endl;
     }
 
     // If there is any invalid directories
     if (!invalidDirs.empty()) {
-        cout << endl << "The following director" << (invalidDirs.size() > 1 ? "ies are" : "y is") << " invalid:"<< endl;
+        cout << endl << "\033[31m" << "The following director" << (invalidDirs.size() > 1 ? "ies are" : "y is") << " invalid:" << "\033[0m" << endl;
         for (size_t i = 0; i < invalidDirs.size(); i++) {
-            cout << "  " << invalidDirs[i] << endl;
+            cout << "  \033[44m" << invalidDirs[i] << "\033[0m" << endl;
         }
-        cout << endl << "Try encapsulating the path in quotation marks, example: \"C:\\Program Files (x86)\\Steam\\steamapps\\common\"";
+        cout << endl << "\033[31m" << "Try encapsulating the path in quotation marks, example: \"C:\\Program Files (x86)\\Steam\\steamapps\\common\"" << "\033[0m" << endl;
     }
 
     return 0;
