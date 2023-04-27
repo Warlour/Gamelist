@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
             cout << "-v, --version  Display version information" << endl;
             return 0;
         } else if (arguments[i] == "-v" || arguments[i] == "--version") {
-            cout << "Gamelist v1.0" << endl << endl;
+            cout << "Gamelist v1.5" << endl << endl;
             cout << "---------------------------------------------------------------------------------" << endl << endl;
             cout << "MIT License" << endl << endl;
             cout << "Copyright (c) 2023 Mathias K. E. Sørensen" << endl << endl;
